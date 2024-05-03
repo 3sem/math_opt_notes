@@ -8,7 +8,7 @@ The Python packages that implement parallel Bayesian optimization using k-means 
 
 3. ~~**Bayesian-Optimization**: This Python package provides a pure Python implementation of Bayesian global optimization with Gaussian processes, but it does not explicitly mention k-means clustering or parallelization[5]~~.
 
-4. **GPyOpt**: GPyOpt is a Python library that uses Bayesian optimization with Gaussian processes, but it does not mention k-means clustering or parallelization using k-means[3].
+4. ~~**GPyOpt**: GPyOpt is a Python library that uses Bayesian optimization with Gaussian processes, but it does not mention k-means clustering or parallelization using k-means[3]~~.
 
 5. **SHERPA**: SHERPA is a Python library that includes implementations of common optimization algorithms, including Bayesian optimization, but it does not mention k-means clustering or parallelization[3].
 
