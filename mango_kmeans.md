@@ -1,5 +1,5 @@
 Here is an example of using Mango for Bayesian optimization with k-means clustering for parallel search:
-``` { .py }
+```{ .py }
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
