@@ -23,11 +23,9 @@ def DefaultOptimizing(num_iterations, num_parallel_trials, func,
     all_scores_and_params = []
     for i in range(num_iterations):
         # Get a list of points in hyperparameter space to evaluate
-        hyperparam_vals = optimizer.ask(n_points=num_parallel_trials,strategy=strategy)
-
+        hyperparam_vals = optimizer.ask(n_points=num_parallel_trials, strategy=strategy)
         # Evaluate the points in parallel
         scores = Parallel(n_jobs=num_parallel_trials)(delayed(func)(v) for v in hyperparam_vals)
-
         # Update the optimizer with the results
         optimizer.tell(hyperparam_vals, scores)
 
@@ -36,7 +34,7 @@ def DefaultOptimizing(num_iterations, num_parallel_trials, func,
         if verbose:
             print("On iter", i, "Optimizer's y'x are:", optimizer.yi)
 # Print the best score found
-    return optimizer
+    return optimizer, all_scores_and_params
 
 
 if __name__ == '__main__':
@@ -59,7 +57,7 @@ if __name__ == '__main__':
         dt = list()
         for i in range(num_rep):
             st = time.time()
-            optimizer = DefaultOptimizing(n_iter, num_threads, func, verbose=verbose)
+            optimizer, all_results = DefaultOptimizing(n_iter, num_threads, func, verbose=verbose)
             et = time.time()
             dt.append(et-st)
             # for these setting it seems that cl_mean and cl_min are better than cl_max
@@ -67,6 +65,8 @@ if __name__ == '__main__':
             print(i, ": Result:", results[-1])
         print("Time evaluation:", "Mean %f; " % (sum(dt) / num_rep), "Min %f ;" % min(dt), "Max %f ;" % max(dt))
         print("Results:", [(i, res) for i, res in enumerate(results)])
+        if verbose:
+            print(all_results)
 
     for st in ["cl_min", "cl_mean", "cl_max"]:
         run_strategies(strategy=st,
