@@ -7,7 +7,7 @@ import sys
 
 
 # Define the number of iterations and parallel trials
-NUM_ITERATIONS = 12
+NUM_ITERATIONS = 10
 NUM_PARALLEL_TRIALS = 4
 
 

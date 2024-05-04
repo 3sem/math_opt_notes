@@ -1,0 +1,1 @@
+#plot_evaluations(res_gp, bins=10)
