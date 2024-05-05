@@ -2,6 +2,7 @@ from skopt import Optimizer
 from skopt.space import Real
 from joblib import Parallel, delayed
 from skopt.benchmarks import branin
+from skopt.plots import plot_evaluations
 import time
 import sys
 
@@ -25,7 +26,7 @@ def DefaultOptimizing(num_iterations, num_parallel_trials, func,
         # Get a list of points in hyperparameter space to evaluate
         hyperparam_vals = optimizer.ask(n_points=num_parallel_trials, strategy=strategy)
         # Evaluate the points in parallel
-        scores = Parallel(n_jobs=num_parallel_trials)(delayed(func)(v) for v in hyperparam_vals)
+        scores = Parallel(n_jobs=4)(delayed(func)(v) for v in hyperparam_vals)
         # Update the optimizer with the results
         optimizer.tell(hyperparam_vals, scores)
 
@@ -33,6 +34,7 @@ def DefaultOptimizing(num_iterations, num_parallel_trials, func,
         all_scores_and_params.extend(zip(hyperparam_vals, scores))
         if verbose:
             print("On iter", i, "Optimizer's y'x are:", optimizer.yi)
+
 # Print the best score found
     return optimizer, all_scores_and_params
 

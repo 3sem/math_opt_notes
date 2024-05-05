@@ -1,7 +1,6 @@
 NUM_ITERATIONS = 10
 NUM_PARALLEL_TRIALS = 4
 
-C:\Users\ICPC-NB-XX\AppData\Local\Programs\Python\Python39\python.exe C:/Users/ICPC-NB-XX/PycharmProjects/math_opt_notes/src/qEI_one_optimizer.py t_eval 10
 DefaultOptimizing: time evaluation mode
 Running for strategy cl_min 10 times:
 9 : Result: 0.3997746971127789
