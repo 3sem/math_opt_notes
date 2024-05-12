@@ -1,3 +1,6 @@
+import cProfile
+import re
+
 from skopt import Optimizer
 from skopt.space import Real
 from joblib import Parallel, delayed
@@ -10,6 +13,7 @@ import sys
 # Define the number of iterations and parallel trials
 NUM_ITERATIONS = 10
 NUM_PARALLEL_TRIALS = 4
+NUM_JOBS = 1
 
 
 # Perform the optimization
@@ -26,21 +30,21 @@ def DefaultOptimizing(num_iterations, num_parallel_trials, func,
         # Get a list of points in hyperparameter space to evaluate
         hyperparam_vals = optimizer.ask(n_points=num_parallel_trials, strategy=strategy)
         # Evaluate the points in parallel
-        scores = Parallel(n_jobs=4)(delayed(func)(v) for v in hyperparam_vals)
+        scores = Parallel(n_jobs=NUM_JOBS)(delayed(func)(v) for v in hyperparam_vals)
         # Update the optimizer with the results
         optimizer.tell(hyperparam_vals, scores)
 
         # Store the results
         all_scores_and_params.extend(zip(hyperparam_vals, scores))
         if verbose:
-            print("On iter", i, "Optimizer's y'x are:", optimizer.yi)
+            print("On iter", i, "Optimizer's best y is:", min(optimizer.yi))
 
 # Print the best score found
     return optimizer, all_scores_and_params
 
 
-if __name__ == '__main__':
 
+def main():
     if sys.argv[1] == "t_eval":
         print("DefaultOptimizing: time evaluation mode")
         verbose = False
@@ -62,6 +66,8 @@ if __name__ == '__main__':
             optimizer, all_results = DefaultOptimizing(n_iter, num_threads, func, verbose=verbose)
             et = time.time()
             dt.append(et-st)
+            if verbose:
+                print("Time spent:", dt[-1])
             # for these setting it seems that cl_mean and cl_min are better than cl_max
             results.append(min(optimizer.yi))
             print(i, ": Result:", results[-1])
@@ -77,3 +83,7 @@ if __name__ == '__main__':
                        num_threads=NUM_PARALLEL_TRIALS,
                        func=branin,
                        verbose=verbose)
+
+if __name__ == '__main__':
+    main()
+    #cProfile.run(main())
