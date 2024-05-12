@@ -1,38 +1,51 @@
+from concurrent.futures import ThreadPoolExecutor # thread pool usage
+import time
+import math
 
-import numpy as np
-from sklearn.datasets import load_iris
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import cross_val_score
+from mango.tuner import Tuner
+from scipy.stats import uniform
+import random
 
-# Load iris dataset
-iris = load_iris()
-X, y = iris.data, iris.target
+# define the num of parallel workers
+n_jobs = 4
 
-# Define the KNN classifier
-clf = KNeighborsClassifier()
+# objfun raise an error when parameter x is <= 0
+def objfun(params):
+    x = params['x']
+    if x <= 0:
+        raise ValueError()
+    return math.log(x)
+# Obj_parallel uses concurrent.futures to parallelize the execution of
+# objfun and handles the failed evaluation
+def obj_parallel(params_list):
+    futures = []
+    params_evaluated = []
+    results = []
 
-# Define the hyperparameter search space
-param_space = {
-    'n_neighbors': range(1, 50),
-    'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
-    'leaf_size': range(10, 50),
-    'p': [1, 2]
+    # here we are use thread executor which is ideal of I/O bound tasks
+    # we can also use the ProcessPoolExecutor depending on the use case
+    with ThreadPoolExecutor(max_workers=n_jobs) as executor:
+        for params in params_list:
+            future = (params, executor.submit(objfun, params))
+            futures.append(future)
+
+        for params, future in futures:
+            try:
+                result = future.result()
+                params_evaluated.append(params)
+                results.append(result)
+            except ValueError:
+                print(f"Value Error raised for {params}")
+
+    return params_evaluated, results
+
+param_dict = {
+    'x': uniform(-2, 10),
 }
 
-# Define the objective function to optimize
-def objective(hyperparameters):
-    clf.set_params(**hyperparameters)
-    scores = cross_val_score(clf, X, y, cv=5)
-    return np.mean(scores)
+if __name__ == '__main__':
+    tuner = Tuner(param_dict, obj_parallel, {'batch_size': n_jobs, 'num_iteration': 10})
+    results = tuner.maximize()
 
-# Initialize Mango
-mango = Mango(objective, param_space, num_iterations=50)
-
-# Run optimization
-mango.run()
-
-# Get results
-best_hyperparameters = mango.best_hyperparameters
-best_score = mango.best_score
-print(f"Best hyperparameters: {best_hyperparameters}")
-print(f"Best score: {best_score}")
+    print('best parameters:',results['best_params'])
+    print('best objective:',results['best_objective'])

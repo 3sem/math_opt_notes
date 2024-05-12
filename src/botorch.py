@@ -1,3 +1,4 @@
+import mango
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -6,7 +7,7 @@ from botorch.models import SingleTaskGP
 from botorch.optim import optimize_acqf
 from botorch.acquisition import UpperConfidenceBound
 from botorch.utils import get_best_candidates
-from botorch.test_functions import Branin
+from sklearn.cluster import KMeans
 
 # Define the objective function
 def branin(x):
@@ -32,14 +33,23 @@ problem = optimize_acqf(
     random_state=0
 )
 
-# Run the optimization
-results = optimize_acqf(problem)
+# Create a Mango parallel optimization object
+parallel_optimization = mango.ParallelOptimization(
+    problem,
+    num_parallel=num_parallel,
+    num_iterations=10
+)
 
-# Get the best candidate
+# Run the parallel optimization
+results = parallel_optimization.optimize()
+
+# Use K-Means to cluster the results
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(results.X)
+
+# Visualize the results using Mango
+mango.plot(results.X, results.Y, kmeans.labels_)
+
+# Print the best candidate
 best_candidate = get_best_candidates(results, num_best=1)[0]
-
-# Evaluate the objective function at the best candidate
-best_value = branin(best_candidate)
-
 print(f"Best candidate: {best_candidate}")
-print(f"Best value: {best_value}")
