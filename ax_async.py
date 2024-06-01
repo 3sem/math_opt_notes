@@ -24,3 +24,4 @@ while n_result < n_trials:
             p = mp.Process(target=evaluate, args=(parameters, servers_id[i], q, trial_index))
             p.start()
             ps[i] = p
+            break
